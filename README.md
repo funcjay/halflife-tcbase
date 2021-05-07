@@ -1,3 +1,17 @@
+Half-Life 1 Total Conversion base
+======================
+
+This repository is meant to serve as a base for other mod creators who want to create a total conversion, but don't want to waste time on cutting out all the un-needed vanilla game code.
+
+This is based off of [Solokiller's Half-Life Updated repository](https://github.com/Solokiller/halflife-updated), which fixes a lot of vanilla bugs and updates the project files to work with Visual Studio 2019/2017.
+
+Changes from the original codebase:
+- temp, list here once done
+
+Credits & special thanks:
+- temp, list here once done
+
+
 Half Life 1 SDK LICENSE
 ======================
 
