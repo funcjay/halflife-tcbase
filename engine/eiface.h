@@ -17,11 +17,7 @@
 
 #include "archtypes.h"     // DAL
 
-#ifdef HLDEMO_BUILD
-#define INTERFACE_VERSION       001
-#else  // !HLDEMO_BUILD, i.e., regular version of HL
 #define INTERFACE_VERSION		140
-#endif // !HLDEMO_BUILD
 
 #include <stdio.h>
 #include "custom.h"
@@ -35,14 +31,6 @@
 //		include progdefs.h
 // This is conveniently done for them in extdll.h
 //
-
-/*
-#ifdef _WIN32
-#define DLLEXPORT __stdcall
-#else
-#define DLLEXPORT  __attribute__ ((visibility("default")))
-#endif
-*/
 
 typedef enum
 	{

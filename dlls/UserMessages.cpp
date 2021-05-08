@@ -52,11 +52,12 @@ int gmsgSayText = 0;
 int gmsgTextMsg = 0;
 int gmsgSetFOV = 0;
 int gmsgShowMenu = 0;
-int gmsgGeigerRange = 0;
 int gmsgTeamNames = 0;
 
 int gmsgStatusText = 0;
 int gmsgStatusValue = 0;
+
+int gmsgFMOD = 0;
 
 void LinkUserMessages()
 {
@@ -68,14 +69,12 @@ void LinkUserMessages()
 
 	gmsgSelAmmo = REG_USER_MSG("SelAmmo", sizeof(SelAmmo));
 	gmsgCurWeapon = REG_USER_MSG("CurWeapon", 3);
-	gmsgGeigerRange = REG_USER_MSG("Geiger", 1);
 	gmsgFlashlight = REG_USER_MSG("Flashlight", 2);
 	gmsgFlashBattery = REG_USER_MSG("FlashBat", 1);
 	gmsgHealth = REG_USER_MSG("Health", 2);
 	gmsgDamage = REG_USER_MSG("Damage", 12);
 	gmsgBattery = REG_USER_MSG("Battery", 2);
 	gmsgTrain = REG_USER_MSG("Train", 1);
-	//gmsgHudText = REG_USER_MSG( "HudTextPro", -1 );
 	gmsgHudText = REG_USER_MSG("HudText", -1); // we don't use the message but 3rd party addons may!
 	gmsgSayText = REG_USER_MSG("SayText", -1);
 	gmsgTextMsg = REG_USER_MSG("TextMsg", -1);
@@ -103,4 +102,6 @@ void LinkUserMessages()
 
 	gmsgStatusText = REG_USER_MSG("StatusText", -1);
 	gmsgStatusValue = REG_USER_MSG("StatusValue", 3);
+
+	gmsgFMOD = REG_USER_MSG("FMOD", -1);
 }

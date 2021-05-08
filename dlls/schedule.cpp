@@ -99,37 +99,6 @@ void CBaseMonster :: ChangeSchedule ( Schedule_t *pNewSchedule )
 		ALERT( at_console, "Schedule %s not in table!!!\n", pNewSchedule->pName );
 	}
 #endif
-	
-// this is very useful code if you can isolate a test case in a level with a single monster. It will notify
-// you of every schedule selection the monster makes.
-#if 0
-	if ( FClassnameIs( pev, "monster_human_grunt" ) )
-	{
-		Task_t *pTask = GetTask();
-		
-		if ( pTask )
-		{
-			const char *pName = NULL;
-
-			if ( m_pSchedule )
-			{
-				pName = m_pSchedule->pName;
-			}
-			else
-			{
-				pName = "No Schedule";
-			}
-			
-			if ( !pName )
-			{
-				pName = "Unknown";
-			}
-
-			ALERT( at_aiconsole, "%s: picked schedule %s\n", STRING( pev->classname ), pName );
-		}
-	}
-#endif// 0
-
 }
 
 //=========================================================
@@ -146,7 +115,6 @@ void CBaseMonster :: NextScheduledTask ()
 	{
 		// just completed last task in schedule, so make it invalid by clearing it.
 		SetConditions( bits_COND_SCHEDULE_DONE );
-		//ClearSchedule();	
 	}
 }
 
@@ -456,16 +424,6 @@ void CBaseMonster :: RunTask ( Task_t *pTask )
 				
 				SetThink ( NULL );
 				StopAnimation();
-
-				if ( !BBoxFlat() )
-				{
-					// a bit of a hack. If a corpses' bbox is positioned such that being left solid so that it can be attacked will
-					// block the player on a slope or stairs, the corpse is made nonsolid. 
-//					pev->solid = SOLID_NOT;
-					UTIL_SetSize ( pev, Vector ( -4, -4, 0 ), Vector ( 4, 4, 1 ) );
-				}
-				else // !!!HACKHACK - put monster in a thin, wide bounding box until we fix the solid type/bounding volume problem
-					UTIL_SetSize ( pev, Vector ( pev->mins.x, pev->mins.y, pev->mins.z ), Vector ( pev->maxs.x, pev->maxs.y, pev->mins.z + 1 ) );
 
 				if ( ShouldFadeOnDeath() )
 				{
@@ -1209,6 +1167,12 @@ case TASK_GET_PATH_TO_BESTSCENT:
 			m_IdealActivity = GetDeathActivity();
 
 			pev->deadflag = DEAD_DYING;
+
+			if (!BBoxFlat())
+				UTIL_SetSize(pev, Vector(-4, -4, 0), Vector(4, 4, 1));
+			else
+				UTIL_SetSize(pev, Vector(pev->mins.x, pev->mins.y, pev->mins.z), Vector(pev->maxs.x, pev->maxs.y, pev->mins.z + 1));
+
 			break;
 		}
 	case TASK_SOUND_WAKE:

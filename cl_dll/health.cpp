@@ -148,11 +148,6 @@ void CHudHealth::GetPainColor( int &r, int &g, int &b )
 		iHealth -= 25;
 	else if ( iHealth < 0 )
 		iHealth = 0;
-#if 0
-	g = iHealth * 255 / 100;
-	r = 255 - g;
-	b = 0;
-#else
 	if (m_iHealth > 25)
 	{
 		UnpackRGB(r,g,b, RGB_YELLOWISH);
@@ -163,7 +158,6 @@ void CHudHealth::GetPainColor( int &r, int &g, int &b )
 		g = 0;
 		b = 0;
 	}
-#endif 
 }
 
 int CHudHealth::Draw(float flTime)
@@ -203,34 +197,28 @@ int CHudHealth::Draw(float flTime)
 	GetPainColor( r, g, b );
 	ScaleColors(r, g, b, a );
 
-	// Only draw health if we have the suit.
-	if (gHUD.m_iWeaponBits & (1<<(WEAPON_SUIT)))
-	{
-		HealthWidth = gHUD.GetSpriteRect(gHUD.m_HUD_number_0).right - gHUD.GetSpriteRect(gHUD.m_HUD_number_0).left;
-		int CrossWidth = gHUD.GetSpriteRect(m_HUD_cross).right - gHUD.GetSpriteRect(m_HUD_cross).left;
+	HealthWidth = gHUD.GetSpriteRect(gHUD.m_HUD_number_0).right - gHUD.GetSpriteRect(gHUD.m_HUD_number_0).left;
+	int CrossWidth = gHUD.GetSpriteRect(m_HUD_cross).right - gHUD.GetSpriteRect(m_HUD_cross).left;
 
-		y = ScreenHeight - gHUD.m_iFontHeight - gHUD.m_iFontHeight / 2;
-		x = CrossWidth /2;
+	y = ScreenHeight - gHUD.m_iFontHeight - gHUD.m_iFontHeight / 2;
+	x = CrossWidth /2;
 
-		SPR_Set(gHUD.GetSprite(m_HUD_cross), r, g, b);
-		SPR_DrawAdditive(0, x, y, &gHUD.GetSpriteRect(m_HUD_cross));
+	SPR_Set(gHUD.GetSprite(m_HUD_cross), r, g, b);
+	SPR_DrawAdditive(0, x, y, &gHUD.GetSpriteRect(m_HUD_cross));
 
-		x = CrossWidth + HealthWidth / 2;
+	x = CrossWidth + HealthWidth / 2;
 
-		//Reserve space for 3 digits by default, but allow it to expand
-		x += gHUD.GetHudNumberWidth(m_iHealth, 3, DHN_DRAWZERO);
+	//Reserve space for 3 digits by default, but allow it to expand
+	x += gHUD.GetHudNumberWidth(m_iHealth, 3, DHN_DRAWZERO);
 
-		gHUD.DrawHudNumberReverse(x, y, m_iHealth, DHN_DRAWZERO, r, g, b);
+	gHUD.DrawHudNumberReverse(x, y, m_iHealth, DHN_DRAWZERO, r, g, b);
 
-		//x = gHUD.DrawHudNumber(x, y, DHN_3DIGITS | DHN_DRAWZERO, m_iHealth, r, g, b);
+	x += HealthWidth/2;
 
-		x += HealthWidth/2;
-
-		int iHeight = gHUD.m_iFontHeight;
-		int iWidth = HealthWidth/10;
-		UnpackRGB(r, g, b, RGB_YELLOWISH);
-		FillRGBA(x, y, iWidth, iHeight, r, g, b, a);
-	}
+	int iHeight = gHUD.m_iFontHeight;
+	int iWidth = HealthWidth/10;
+	UnpackRGB(r, g, b, RGB_YELLOWISH);
+	FillRGBA(x, y, iWidth, iHeight, r, g, b, a);
 
 	DrawDamage(flTime);
 	return DrawPain(flTime);

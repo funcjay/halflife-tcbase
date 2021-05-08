@@ -31,14 +31,8 @@ Non-transparent triangles-- add them here
 */
 void DLLEXPORT HUD_DrawNormalTriangles()
 {
-//	RecClDrawNormalTriangles();
-
 	gHUD.m_Spectator.DrawOverview();
 }
-
-#if defined( _TFC )
-void RunEventList();
-#endif
 
 /*
 =================
@@ -49,12 +43,6 @@ Render any triangles with transparent rendermode needs here
 */
 void DLLEXPORT HUD_DrawTransparentTriangles()
 {
-//	RecClDrawTransparentTriangles();
-
-#if defined( _TFC )
-	RunEventList();
-#endif
-
 	if ( g_pParticleMan )
 		 g_pParticleMan->Update();
 }

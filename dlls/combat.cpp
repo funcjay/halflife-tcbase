@@ -987,19 +987,6 @@ int CBaseMonster :: DeadTakeDamage( entvars_t *pevInflictor, entvars_t *pevAttac
 		}
 	}
 
-#if 0// turn this back on when the bounding box issues are resolved.
-
-	pev->flags &= ~FL_ONGROUND;
-	pev->origin.z += 1;
-	
-	// let the damage scoot the corpse around a bit.
-	if ( !FNullEnt(pevInflictor) && (pevAttacker->solid != SOLID_TRIGGER) )
-	{
-		pev->velocity = pev->velocity + vecDir * -DamageForce( flDamage );
-	}
-
-#endif
-
 	// kill the corpse if enough damage was done to destroy the corpse and the damage is of a type that is allowed to destroy the corpse.
 	if ( bitsDamageType & DMG_GIB_CORPSE )
 	{
@@ -1365,11 +1352,9 @@ void CBaseMonster :: TraceAttack( entvars_t *pevAttacker, float flDamage, Vector
 FireBullets
 
 Go to the trouble of combining multiple pellets into a single damage call.
-
-This version is used by Monsters.
 ================
 */
-void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting, Vector vecSpread, float flDistance, int iBulletType, int iTracerFreq, int iDamage, entvars_t *pevAttacker )
+void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting, Vector vecSpread, float flDistance, int iBulletType, int iTracerFreq, int iDamage, entvars_t* pevAttacker)
 {
 	static int tracerCount;
 	int tracer;
@@ -1377,7 +1362,7 @@ void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting
 	Vector vecRight = gpGlobals->v_right;
 	Vector vecUp = gpGlobals->v_up;
 
-	if ( pevAttacker == NULL )
+	if (pevAttacker == NULL)
 		pevAttacker = pev;  // the default attacker is ourselves
 
 	ClearMultiDamage();
@@ -1388,14 +1373,14 @@ void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting
 		// get circular gaussian spread
 		float x, y, z;
 		do {
-			x = RANDOM_FLOAT(-0.5,0.5) + RANDOM_FLOAT(-0.5,0.5);
-			y = RANDOM_FLOAT(-0.5,0.5) + RANDOM_FLOAT(-0.5,0.5);
-			z = x*x+y*y;
+			x = RANDOM_FLOAT(-0.5, 0.5) + RANDOM_FLOAT(-0.5, 0.5);
+			y = RANDOM_FLOAT(-0.5, 0.5) + RANDOM_FLOAT(-0.5, 0.5);
+			z = x * x + y * y;
 		} while (z > 1);
 
 		Vector vecDir = vecDirShooting +
-						x * vecSpread.x * vecRight +
-						y * vecSpread.y * vecUp;
+			x * vecSpread.x * vecRight +
+			y * vecSpread.y * vecUp;
 		Vector vecEnd;
 
 		vecEnd = vecSrc + vecDir * flDistance;
@@ -1406,191 +1391,66 @@ void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting
 		{
 			Vector vecTracerSrc;
 
-			if ( IsPlayer() )
+			if (IsPlayer())
 			{// adjust tracer position for player
-				vecTracerSrc = vecSrc + Vector ( 0 , 0 , -4 ) + gpGlobals->v_right * 2 + gpGlobals->v_forward * 16;
+				vecTracerSrc = vecSrc + Vector(0, 0, -4) + gpGlobals->v_right * 2 + gpGlobals->v_forward * 16;
 			}
 			else
 			{
 				vecTracerSrc = vecSrc;
 			}
-			
-			if ( iTracerFreq != 1 )		// guns that always trace also always decal
+
+			if (iTracerFreq != 1)		// guns that always trace also always decal
 				tracer = 1;
-			switch( iBulletType )
-			{
-			case BULLET_MONSTER_MP5:
-			case BULLET_MONSTER_9MM:
-			case BULLET_MONSTER_12MM:
-			default:
-				MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, vecTracerSrc );
-					WRITE_BYTE( TE_TRACER );
-					WRITE_COORD( vecTracerSrc.x );
-					WRITE_COORD( vecTracerSrc.y );
-					WRITE_COORD( vecTracerSrc.z );
-					WRITE_COORD( tr.vecEndPos.x );
-					WRITE_COORD( tr.vecEndPos.y );
-					WRITE_COORD( tr.vecEndPos.z );
-				MESSAGE_END();
-				break;
-			}
+
+			MESSAGE_BEGIN(MSG_PAS, SVC_TEMPENTITY, vecTracerSrc);
+				WRITE_BYTE(TE_TRACER);
+				WRITE_COORD(vecTracerSrc.x);
+				WRITE_COORD(vecTracerSrc.y);
+				WRITE_COORD(vecTracerSrc.z);
+				WRITE_COORD(tr.vecEndPos.x);
+				WRITE_COORD(tr.vecEndPos.y);
+				WRITE_COORD(tr.vecEndPos.z);
+			MESSAGE_END();
 		}
 		// do damage, paint decals
 		if (tr.flFraction != 1.0)
 		{
-			CBaseEntity *pEntity = CBaseEntity::Instance(tr.pHit);
+			CBaseEntity* pEntity = CBaseEntity::Instance(tr.pHit);
 
-			if ( iDamage )
+			if (iDamage)
 			{
-				pEntity->TraceAttack(pevAttacker, iDamage, vecDir, &tr, DMG_BULLET | ((iDamage > 16) ? DMG_ALWAYSGIB : DMG_NEVERGIB) );
-				
-				TEXTURETYPE_PlaySound(&tr, vecSrc, vecEnd, iBulletType);
-				DecalGunshot( &tr, iBulletType );
-			} 
-			else switch(iBulletType)
-			{
-			case BULLET_PLAYER_BUCKSHOT:
-				// make distance based!
-				pEntity->TraceAttack(pevAttacker, gSkillData.plrDmgBuckshot, vecDir, &tr, DMG_BULLET);
+				pEntity->TraceAttack(pevAttacker, iDamage, vecDir, &tr, DMG_BULLET | ((iDamage > 16) ? DMG_ALWAYSGIB : DMG_NEVERGIB));
 
 				TEXTURETYPE_PlaySound(&tr, vecSrc, vecEnd, iBulletType);
 				DecalGunshot(&tr, iBulletType);
-				break;
-
+			}
+			else switch (iBulletType)
+			{
 			default:
-			case BULLET_MONSTER_9MM:
-				pEntity->TraceAttack(pevAttacker, gSkillData.monDmg9MM, vecDir, &tr, DMG_BULLET);
-				
-				TEXTURETYPE_PlaySound(&tr, vecSrc, vecEnd, iBulletType);
-				DecalGunshot( &tr, iBulletType );
-
-				break;
-
-			case BULLET_MONSTER_MP5:
-				pEntity->TraceAttack(pevAttacker, gSkillData.monDmgMP5, vecDir, &tr, DMG_BULLET);
-				
-				TEXTURETYPE_PlaySound(&tr, vecSrc, vecEnd, iBulletType);
-				DecalGunshot( &tr, iBulletType );
-
-				break;
-
-			case BULLET_MONSTER_12MM:		
-				pEntity->TraceAttack(pevAttacker, gSkillData.monDmg12MM, vecDir, &tr, DMG_BULLET); 
-				if ( !tracer )
+				pEntity->TraceAttack(pevAttacker, gSkillData.plrDmg9MM, vecDir, &tr, DMG_BULLET);
+				if (!tracer)
 				{
 					TEXTURETYPE_PlaySound(&tr, vecSrc, vecEnd, iBulletType);
-					DecalGunshot( &tr, iBulletType );
+					DecalGunshot(&tr, iBulletType);
 				}
 				break;
-			
-			case BULLET_NONE: // FIX 
+
+			case BULLET_NONE:
 				pEntity->TraceAttack(pevAttacker, 50, vecDir, &tr, DMG_CLUB);
 				TEXTURETYPE_PlaySound(&tr, vecSrc, vecEnd, iBulletType);
 				// only decal glass
-				if ( !FNullEnt(tr.pHit) && VARS(tr.pHit)->rendermode != 0)
+				if (!FNullEnt(tr.pHit) && VARS(tr.pHit)->rendermode != 0)
 				{
-					UTIL_DecalTrace( &tr, DECAL_GLASSBREAK1 + RANDOM_LONG(0,2) );
+					UTIL_DecalTrace(&tr, DECAL_GLASSBREAK1 + RANDOM_LONG(0, 2));
 				}
-
 				break;
 			}
 		}
 		// make bullet trails
-		UTIL_BubbleTrail( vecSrc, tr.vecEndPos, (flDistance * tr.flFraction) / 64.0 );
+		UTIL_BubbleTrail(vecSrc, tr.vecEndPos, (flDistance * tr.flFraction) / 64.0);
 	}
 	ApplyMultiDamage(pev, pevAttacker);
-}
-
-
-/*
-================
-FireBullets
-
-Go to the trouble of combining multiple pellets into a single damage call.
-
-This version is used by Players, uses the random seed generator to sync client and server side shots.
-================
-*/
-Vector CBaseEntity::FireBulletsPlayer ( ULONG cShots, Vector vecSrc, Vector vecDirShooting, Vector vecSpread, float flDistance, int iBulletType, int iTracerFreq, int iDamage, entvars_t *pevAttacker, int shared_rand )
-{
-	static int tracerCount;
-	TraceResult tr;
-	Vector vecRight = gpGlobals->v_right;
-	Vector vecUp = gpGlobals->v_up;
-	float x, y, z;
-
-	if ( pevAttacker == NULL )
-		pevAttacker = pev;  // the default attacker is ourselves
-
-	ClearMultiDamage();
-	gMultiDamage.type = DMG_BULLET | DMG_NEVERGIB;
-
-	for ( ULONG iShot = 1; iShot <= cShots; iShot++ )
-	{
-		//Use player's random seed.
-		// get circular gaussian spread
-		x = UTIL_SharedRandomFloat( shared_rand + iShot, -0.5, 0.5 ) + UTIL_SharedRandomFloat( shared_rand + ( 1 + iShot ) , -0.5, 0.5 );
-		y = UTIL_SharedRandomFloat( shared_rand + ( 2 + iShot ), -0.5, 0.5 ) + UTIL_SharedRandomFloat( shared_rand + ( 3 + iShot ), -0.5, 0.5 );
-		z = x * x + y * y;
-
-		Vector vecDir = vecDirShooting +
-						x * vecSpread.x * vecRight +
-						y * vecSpread.y * vecUp;
-		Vector vecEnd;
-
-		vecEnd = vecSrc + vecDir * flDistance;
-		UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, ENT(pev)/*pentIgnore*/, &tr);
-		
-		// do damage, paint decals
-		if (tr.flFraction != 1.0)
-		{
-			CBaseEntity *pEntity = CBaseEntity::Instance(tr.pHit);
-
-			if ( iDamage )
-			{
-				pEntity->TraceAttack(pevAttacker, iDamage, vecDir, &tr, DMG_BULLET | ((iDamage > 16) ? DMG_ALWAYSGIB : DMG_NEVERGIB) );
-				
-				TEXTURETYPE_PlaySound(&tr, vecSrc, vecEnd, iBulletType);
-				DecalGunshot( &tr, iBulletType );
-			} 
-			else switch(iBulletType)
-			{
-			default:
-			case BULLET_PLAYER_9MM:		
-				pEntity->TraceAttack(pevAttacker, gSkillData.plrDmg9MM, vecDir, &tr, DMG_BULLET); 
-				break;
-
-			case BULLET_PLAYER_MP5:		
-				pEntity->TraceAttack(pevAttacker, gSkillData.plrDmgMP5, vecDir, &tr, DMG_BULLET); 
-				break;
-
-			case BULLET_PLAYER_BUCKSHOT:	
-				 // make distance based!
-				pEntity->TraceAttack(pevAttacker, gSkillData.plrDmgBuckshot, vecDir, &tr, DMG_BULLET); 
-				break;
-			
-			case BULLET_PLAYER_357:		
-				pEntity->TraceAttack(pevAttacker, gSkillData.plrDmg357, vecDir, &tr, DMG_BULLET); 
-				break;
-				
-			case BULLET_NONE: // FIX 
-				pEntity->TraceAttack(pevAttacker, 50, vecDir, &tr, DMG_CLUB);
-				TEXTURETYPE_PlaySound(&tr, vecSrc, vecEnd, iBulletType);
-				// only decal glass
-				if ( !FNullEnt(tr.pHit) && VARS(tr.pHit)->rendermode != 0)
-				{
-					UTIL_DecalTrace( &tr, DECAL_GLASSBREAK1 + RANDOM_LONG(0,2) );
-				}
-
-				break;
-			}
-		}
-		// make bullet trails
-		UTIL_BubbleTrail( vecSrc, tr.vecEndPos, (flDistance * tr.flFraction) / 64.0 );
-	}
-	ApplyMultiDamage(pev, pevAttacker);
-
-	return Vector( x * vecSpread.x, y * vecSpread.y, 0.0 );
 }
 
 void CBaseEntity :: TraceBleed( float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType )

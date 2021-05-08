@@ -478,13 +478,8 @@ void CWorld :: Precache()
 {
 	g_pLastSpawn = NULL;
 	
-#if 1
 	CVAR_SET_STRING("sv_gravity", "800"); // 67ft/sec
 	CVAR_SET_STRING("sv_stepsize", "18");
-#else
-	CVAR_SET_STRING("sv_gravity", "384"); // 32ft/sec
-	CVAR_SET_STRING("sv_stepsize", "24");
-#endif
 
 	CVAR_SET_STRING("room_type", "0");// clear DSP
 
@@ -675,11 +670,6 @@ void CWorld :: KeyValue( KeyValueData *pkvd )
 	{
 		// Sent over net now.
 		CVAR_SET_STRING( "sv_skyname", pkvd->szValue );
-		pkvd->fHandled = TRUE;
-	}
-	else if ( FStrEq(pkvd->szKeyName, "sounds") )
-	{
-		gpGlobals->cdAudioTrack = atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if ( FStrEq(pkvd->szKeyName, "WaveHeight") )

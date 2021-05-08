@@ -243,7 +243,7 @@ int CBasePlayer :: TakeHealth( float flHealth, int bitsDamageType ) { return 0; 
 void CBasePlayer :: TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType) { }
 int CBasePlayer :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType ) { return 0; }
 void CBasePlayer::PackDeadPlayerItems() { }
-void CBasePlayer::RemoveAllItems( BOOL removeSuit ) { }
+void CBasePlayer::RemoveAllItems() { }
 void CBasePlayer::SetAnimation( PLAYER_ANIM playerAnim ) { }
 void CBasePlayer::WaterMove() { }
 BOOL CBasePlayer::IsOnLadder() { return FALSE; }
@@ -256,9 +256,6 @@ void CBasePlayer::Duck( ) { }
 int  CBasePlayer::Classify () { return 0; }
 void CBasePlayer::PreThink() { }
 void CBasePlayer::CheckTimeBasedDamage()  { }
-void CBasePlayer :: UpdateGeigerCounter() { }
-void CBasePlayer::CheckSuitUpdate() { }
-void CBasePlayer::SetSuitUpdate(const char *name, int fgroup, int iNoRepeatTime) { }
 void CBasePlayer :: UpdatePlayerSound () { }
 void CBasePlayer::PostThink() { }
 void CBasePlayer :: Precache() { }
@@ -326,7 +323,7 @@ void CBasePlayerItem::DestroyItem() { }
 int CBasePlayerItem::AddToPlayer( CBasePlayer *pPlayer ) { return TRUE; }
 void CBasePlayerItem::Drop() { }
 void CBasePlayerItem::Kill() { }
-void CBasePlayerItem::Holster( int skiplocal ) { }
+void CBasePlayerItem::Holster() { }
 void CBasePlayerItem::AttachToPlayer ( CBasePlayer *pPlayer ) { }
 int CBasePlayerWeapon::AddDuplicate( CBasePlayerItem *pOriginal ) { return 0; }
 int CBasePlayerWeapon::AddToPlayer( CBasePlayer *pPlayer ) { return FALSE; }

@@ -44,41 +44,8 @@ extern Vector v_angles;		// last view angle
 extern Vector v_cl_angles;	// last client/mouse angle
 extern Vector v_sim_org;	// last sim origin
 
-#if 0 
-const char *GetSpectatorLabel ( int iMode )
-{
-	switch ( iMode )
-	{
-		case OBS_CHASE_LOCKED:
-			return "#OBS_CHASE_LOCKED";
-
-		case OBS_CHASE_FREE:
-			return "#OBS_CHASE_FREE";
-
-		case OBS_ROAMING:
-			return "#OBS_ROAMING";
-		
-		case OBS_IN_EYE:
-			return "#OBS_IN_EYE";
-
-		case OBS_MAP_FREE:
-			return "#OBS_MAP_FREE";
-
-		case OBS_MAP_CHASE:
-			return "#OBS_MAP_CHASE";
-
-		case OBS_NONE:
-		default:
-			return "#OBS_NONE";
-	}
-}
-
-#endif
-
 void SpectatorMode()
 {
-
-
 	if ( gEngfuncs.Cmd_Argc() <= 1 )
 	{
 		gEngfuncs.Con_Printf( "usage:  spec_mode <Main Mode> [<Inset Mode>]\n" );

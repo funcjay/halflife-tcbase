@@ -51,22 +51,6 @@ int   g_irunninggausspred = 0;
 
 Vector previousorigin;
 
-// HLDM Weapon placeholder entities.
-CGlock g_Glock;
-CCrowbar g_Crowbar;
-CPython g_Python;
-CMP5 g_Mp5;
-CCrossbow g_Crossbow;
-CShotgun g_Shotgun;
-CRpg g_Rpg;
-CGauss g_Gauss;
-CEgon g_Egon;
-CHgun g_HGun;
-CHandGrenade g_HandGren;
-CSatchel g_Satchel;
-CTripmine g_Tripmine;
-CSqueak g_Snark;
-
 
 /*
 ======================
@@ -199,7 +183,7 @@ CBasePlayerWeapon::Holster
 Put away weapon
 =====================
 */
-void CBasePlayerWeapon::Holster( int skiplocal /* = 0 */ )
+void CBasePlayerWeapon::Holster()
 { 
 	m_fInReload = FALSE; // cancel any reload in progress.
 	g_irunninggausspred = false;
@@ -218,42 +202,6 @@ void CBasePlayerWeapon::SendWeaponAnim( int iAnim, int skiplocal, int body )
 	m_pPlayer->pev->weaponanim = iAnim;
 	
 	HUD_SendWeaponAnim( iAnim, body, 0 );
-}
-
-/*
-=====================
-CBaseEntity::FireBulletsPlayer
-
-Only produces random numbers to match the server ones.
-=====================
-*/
-Vector CBaseEntity::FireBulletsPlayer ( ULONG cShots, Vector vecSrc, Vector vecDirShooting, Vector vecSpread, float flDistance, int iBulletType, int iTracerFreq, int iDamage, entvars_t *pevAttacker, int shared_rand )
-{
-	float x, y, z;
-
-	for ( ULONG iShot = 1; iShot <= cShots; iShot++ )
-	{
-		if ( pevAttacker == NULL )
-		{
-			// get circular gaussian spread
-			do {
-					x = RANDOM_FLOAT(-0.5, 0.5) + RANDOM_FLOAT(-0.5, 0.5);
-					y = RANDOM_FLOAT(-0.5, 0.5) + RANDOM_FLOAT(-0.5, 0.5);
-					z = x*x+y*y;
-			} while (z > 1);
-		}
-		else
-		{
-			//Use player's random seed.
-			// get circular gaussian spread
-			x = UTIL_SharedRandomFloat( shared_rand + iShot, -0.5, 0.5 ) + UTIL_SharedRandomFloat( shared_rand + ( 1 + iShot ) , -0.5, 0.5 );
-			y = UTIL_SharedRandomFloat( shared_rand + ( 2 + iShot ), -0.5, 0.5 ) + UTIL_SharedRandomFloat( shared_rand + ( 3 + iShot ), -0.5, 0.5 );
-			z = x * x + y * y;
-		}
-			
-	}
-
-    return Vector ( x * vecSpread.x, y * vecSpread.y, 0.0 );
 }
 
 /*
@@ -448,22 +396,6 @@ void HUD_InitClientWeapons()
 
 	// Allocate a slot for the local player
 	HUD_PrepEntity( &player		, NULL );
-
-	// Allocate slot(s) for each weapon that we are going to be predicting
-	HUD_PrepEntity( &g_Glock	, &player );
-	HUD_PrepEntity( &g_Crowbar	, &player );
-	HUD_PrepEntity( &g_Python	, &player );
-	HUD_PrepEntity( &g_Mp5	, &player );
-	HUD_PrepEntity( &g_Crossbow	, &player );
-	HUD_PrepEntity( &g_Shotgun	, &player );
-	HUD_PrepEntity( &g_Rpg	, &player );
-	HUD_PrepEntity( &g_Gauss	, &player );
-	HUD_PrepEntity( &g_Egon	, &player );
-	HUD_PrepEntity( &g_HGun	, &player );
-	HUD_PrepEntity( &g_HandGren	, &player );
-	HUD_PrepEntity( &g_Satchel	, &player );
-	HUD_PrepEntity( &g_Tripmine	, &player );
-	HUD_PrepEntity( &g_Snark	, &player );
 }
 
 /*
@@ -525,67 +457,6 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	// Get current clock
 	gpGlobals->time = time;
 
-	// Fill in data based on selected weapon
-	// FIXME, make this a method in each weapon?  where you pass in an entity_state_t *?
-	switch ( from->client.m_iId )
-	{
-		case WEAPON_CROWBAR:
-			pWeapon = &g_Crowbar;
-			break;
-		
-		case WEAPON_GLOCK:
-			pWeapon = &g_Glock;
-			break;
-		
-		case WEAPON_PYTHON:
-			pWeapon = &g_Python;
-			break;
-			
-		case WEAPON_MP5:
-			pWeapon = &g_Mp5;
-			break;
-
-		case WEAPON_CROSSBOW:
-			pWeapon = &g_Crossbow;
-			break;
-
-		case WEAPON_SHOTGUN:
-			pWeapon = &g_Shotgun;
-			break;
-
-		case WEAPON_RPG:
-			pWeapon = &g_Rpg;
-			break;
-
-		case WEAPON_GAUSS:
-			pWeapon = &g_Gauss;
-			break;
-
-		case WEAPON_EGON:
-			pWeapon = &g_Egon;
-			break;
-
-		case WEAPON_HORNETGUN:
-			pWeapon = &g_HGun;
-			break;
-
-		case WEAPON_HANDGRENADE:
-			pWeapon = &g_HandGren;
-			break;
-
-		case WEAPON_SATCHEL:
-			pWeapon = &g_Satchel;
-			break;
-
-		case WEAPON_TRIPMINE:
-			pWeapon = &g_Tripmine;
-			break;
-
-		case WEAPON_SNARK:
-			pWeapon = &g_Snark;
-			break;
-	}
-
 	// Store pointer to our destination entity_state_t so we can get our origin, etc. from it
 	//  for setting up events on the client
 	g_finalstate = to;
@@ -624,7 +495,6 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 		
 		pCurrent->m_fInReload			= pfrom->m_fInReload;
 		pCurrent->m_fInSpecialReload	= pfrom->m_fInSpecialReload;
-//		pCurrent->m_flPumpTime			= pfrom->m_flPumpTime;
 		pCurrent->m_iClip				= pfrom->m_iClip;
 		pCurrent->m_flNextPrimaryAttack	= pfrom->m_flNextPrimaryAttack;
 		pCurrent->m_flNextSecondaryAttack = pfrom->m_flNextSecondaryAttack;
@@ -689,12 +559,6 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	{
 		player.m_pActiveItem = g_pWpns[ from->client.m_iId ];
 	}
-
-	if ( player.m_pActiveItem->m_iId == WEAPON_RPG )
-	{
-		 ( ( CRpg * )player.m_pActiveItem)->m_fSpotActive = (int)from->client.vuser2[ 1 ];
-		 ( ( CRpg * )player.m_pActiveItem)->m_cActiveRockets = (int)from->client.vuser2[ 2 ];
-	}
 	
 	// Don't go firing anything if we have died or are spectating
 	// Or if we don't have a weapon model deployed
@@ -758,19 +622,10 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	to->client.vuser2[0]				= player.ammo_hornets;
 	to->client.ammo_rockets				= player.ammo_rockets;
 
-	if ( player.m_pActiveItem->m_iId == WEAPON_RPG )
-	{
-		 from->client.vuser2[ 1 ] = ( ( CRpg * )player.m_pActiveItem)->m_fSpotActive;
-		 from->client.vuser2[ 2 ] = ( ( CRpg * )player.m_pActiveItem)->m_cActiveRockets;
-	}
-
 	// Make sure that weapon animation matches what the game .dll is telling us
 	//  over the wire ( fixes some animation glitches )
 	if ( g_runfuncs && ( HUD_GetWeaponAnim() != to->client.weaponanim ) )
 	{
-		//Make sure the 357 has the right body
-		g_Python.pev->body = bIsMultiplayer() ? 1 : 0;
-
 		// Force a fixed anim down to viewmodel
 		HUD_SendWeaponAnim( to->client.weaponanim, pWeapon->pev->body, 1 );
 	}
@@ -891,20 +746,9 @@ be ignored
 */
 void DLLEXPORT HUD_PostRunCmd( struct local_state_s *from, struct local_state_s *to, struct usercmd_s *cmd, int runfuncs, double time, unsigned int random_seed )
 {
-//	RecClPostRunCmd(from, to, cmd, runfuncs, time, random_seed);
-
 	g_runfuncs = runfuncs;
 
-#if defined( CLIENT_WEAPONS )
-	if ( cl_lw && cl_lw->value )
-	{
-		HUD_WeaponsPostThink( from, to, cmd, time, random_seed );
-	}
-	else
-#endif
-	{
-		to->client.fov = g_lastFOV;
-	}
+	to->client.fov = g_lastFOV;
 
 	if ( g_irunninggausspred == 1 )
 	{

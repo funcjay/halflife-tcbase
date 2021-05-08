@@ -916,14 +916,6 @@ void CBaseMonster :: RouteSimplify( CBaseEntity *pTargetEnt )
 	// Terminate route
 	if ( i < ROUTE_SIZE )
 		m_Route[i].iType = 0;
-
-// Debug, test movement code
-#if 0
-//	if ( CVAR_GET_FLOAT( "simplify" ) != 0 )
-		DrawRoute( pev, outRoute, 0, 255, 0, 0 );
-//	else
-		DrawRoute( pev, m_Route, m_iRouteIndex, 0, 255, 0 );
-#endif
 }
 
 //=========================================================
@@ -1674,54 +1666,6 @@ BOOL CBaseMonster :: FTriangulate ( const Vector &vecStart , const Vector &vecEn
 
 	for ( i = 0 ; i < 8; i++ )
 	{
-// Debug, Draw the triangulation
-#if 0
-		MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
-			WRITE_BYTE( TE_SHOWLINE);
-			WRITE_COORD( pev->origin.x );
-			WRITE_COORD( pev->origin.y );
-			WRITE_COORD( pev->origin.z );
-			WRITE_COORD( vecRight.x );
-			WRITE_COORD( vecRight.y );
-			WRITE_COORD( vecRight.z );
-		MESSAGE_END();
-
-		MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
-			WRITE_BYTE( TE_SHOWLINE );
-			WRITE_COORD( pev->origin.x );
-			WRITE_COORD( pev->origin.y );
-			WRITE_COORD( pev->origin.z );
-			WRITE_COORD( vecLeft.x );
-			WRITE_COORD( vecLeft.y );
-			WRITE_COORD( vecLeft.z );
-		MESSAGE_END();
-#endif
-
-#if 0
-		if (pev->movetype == MOVETYPE_FLY)
-		{
-			MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
-				WRITE_BYTE( TE_SHOWLINE );
-				WRITE_COORD( pev->origin.x );
-				WRITE_COORD( pev->origin.y );
-				WRITE_COORD( pev->origin.z );
-				WRITE_COORD( vecTop.x );
-				WRITE_COORD( vecTop.y );
-				WRITE_COORD( vecTop.z );
-			MESSAGE_END();
-
-			MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
-				WRITE_BYTE( TE_SHOWLINE );
-				WRITE_COORD( pev->origin.x );
-				WRITE_COORD( pev->origin.y );
-				WRITE_COORD( pev->origin.z );
-				WRITE_COORD( vecBottom.x );
-				WRITE_COORD( vecBottom.y );
-				WRITE_COORD( vecBottom.z );
-			MESSAGE_END();
-		}
-#endif
-
 		if ( CheckLocalMove( pev->origin, vecRight, pTargetEnt, NULL ) == LOCALMOVE_VALID )
 		{
 			if ( CheckLocalMove ( vecRight, vecFarSide, pTargetEnt, NULL ) == LOCALMOVE_VALID )
@@ -1756,13 +1700,11 @@ BOOL CBaseMonster :: FTriangulate ( const Vector &vecStart , const Vector &vecEn
 					if ( pApex )
 					{
 						*pApex = vecTop;
-						//ALERT(at_aiconsole, "triangulate over\n");
 					}
 
 					return TRUE;
 				}
 			}
-#if 1
 			if ( CheckLocalMove( pev->origin, vecBottom, pTargetEnt, NULL ) == LOCALMOVE_VALID )
 			{
 				if ( CheckLocalMove ( vecBottom, vecFarSide, pTargetEnt, NULL ) == LOCALMOVE_VALID )
@@ -1770,13 +1712,11 @@ BOOL CBaseMonster :: FTriangulate ( const Vector &vecStart , const Vector &vecEn
 					if ( pApex )
 					{
 						*pApex = vecBottom;
-						//ALERT(at_aiconsole, "triangulate under\n");
 					}
 
 					return TRUE;
 				}
 			}
-#endif
 		}
 
 		vecRight = vecRight + vecDir;
@@ -1820,22 +1760,6 @@ void CBaseMonster :: Move ( float flInterval )
 	
 	if ( m_flMoveWaitFinished > gpGlobals->time )
 		return;
-
-// Debug, test movement code
-#if 0
-//	if ( CVAR_GET_FLOAT("stopmove" ) != 0 )
-	{
-		if ( m_movementGoal == MOVEGOAL_ENEMY )
-			RouteSimplify( m_hEnemy );
-		else
-			RouteSimplify( m_hTargetEnt );
-		FRefreshRoute();
-		return;
-	}
-#else
-// Debug, draw the route
-//	DrawRoute( pev, m_Route, m_iRouteIndex, 0, 200, 0 );
-#endif
 
 	// if the monster is moving directly towards an entity (enemy for instance), we'll set this pointer
 	// to that entity for the CheckLocalMove and Triangulate functions.
@@ -2114,15 +2038,6 @@ void CBaseMonster :: StartMonster ()
 			// Monster will start turning towards his destination
 			MakeIdealYaw ( m_pGoalEnt->pev->origin );
 
-			// JAY: How important is this error message?  Big Momma doesn't obey this rule, so I took it out.
-#if 0
-			// At this point, we expect only a path_corner as initial goal
-			if (!FClassnameIs( m_pGoalEnt->pev, "path_corner"))
-			{
-				ALERT(at_warning, "ReadyMonster--monster's initial goal '%s' is not a path_corner", STRING(pev->target));
-			}
-#endif
-
 			// set the monster up to walk a path corner path. 
 			// !!!BUGBUG - this is a minor bit of a hack.
 			// JAYJAY
@@ -2141,9 +2056,6 @@ void CBaseMonster :: StartMonster ()
 			ChangeSchedule( GetScheduleOfType( SCHED_IDLE_WALK ) );
 		}
 	}
-	
-	//SetState ( m_IdealMonsterState );
-	//SetActivity ( m_IdealActivity );
 
 	// Delay drop to floor to make sure each door in the level has had its chance to spawn
 	// Spread think times so that they don't all happen at the same time (Carmack)
@@ -2683,12 +2595,6 @@ void CBaseMonster :: HandleAnimEvent( MonsterEvent_t *pEvent )
 			m_pCine->AllowInterrupt( TRUE );
 		break;
 
-#if 0
-	case SCRIPT_EVENT_INAIR:			// Don't DROP_TO_FLOOR()
-	case SCRIPT_EVENT_ENDANIMATION:		// Set ending animation sequence to
-		break;
-#endif
-
 	case MONSTER_EVENT_BODYDROP_HEAVY:
 		if ( pev->flags & FL_ONGROUND )
 		{
@@ -2783,13 +2689,11 @@ BOOL CBaseMonster :: FGetNodeRoute ( Vector vecDest )
 	if ( iSrcNode == -1 )
 	{
 		// no node nearest self
-//		ALERT ( at_aiconsole, "FGetNodeRoute: No valid node near self!\n" );
 		return FALSE;
 	}
 	else if ( iDestNode == -1 )
 	{
 		// no node nearest target
-//		ALERT ( at_aiconsole, "FGetNodeRoute: No valid node near target!\n" );
 		return FALSE;
 	}
 
@@ -2800,24 +2704,8 @@ BOOL CBaseMonster :: FGetNodeRoute ( Vector vecDest )
 
 	if ( !iResult )
 	{
-#if 1
 		ALERT ( at_aiconsole, "No Path from %d to %d!\n", iSrcNode, iDestNode );
 		return FALSE;
-#else
-		BOOL bRoutingSave = WorldGraph.m_fRoutingComplete;
-		WorldGraph.m_fRoutingComplete = FALSE;
-		iResult = WorldGraph.FindShortestPath(iPath, iSrcNode, iDestNode, iNodeHull, m_afCapability);
-		WorldGraph.m_fRoutingComplete = bRoutingSave;
-		if ( !iResult )
-		{
-			ALERT ( at_aiconsole, "No Path from %d to %d!\n", iSrcNode, iDestNode );
-			return FALSE;
-		}
-		else
-		{
-			ALERT ( at_aiconsole, "Routing is inconsistent!" );
-		}
-#endif
 	}
 
 	// there's a valid path within iPath now, so now we will fill the route array

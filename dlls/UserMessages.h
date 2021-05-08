@@ -48,10 +48,11 @@ extern int gmsgSayText;
 extern int gmsgTextMsg;
 extern int gmsgSetFOV;
 extern int gmsgShowMenu;
-extern int gmsgGeigerRange;
 extern int gmsgTeamNames;
 
 extern int gmsgStatusText;
 extern int gmsgStatusValue;
+
+extern int gmsgFMOD;
 
 void LinkUserMessages();

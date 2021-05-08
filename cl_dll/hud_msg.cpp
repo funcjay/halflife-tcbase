@@ -26,16 +26,6 @@ extern IParticleMan *g_pParticleMan;
 
 #define MAX_CLIENTS 32
 
-#if !defined( _TFC )
-extern BEAM *pBeam;
-extern BEAM *pBeam2;
-extern TEMPENTITY* pFlare;	// Vit_amiN
-#endif 
-
-#if defined( _TFC )
-void ClearEventList();
-#endif
-
 /// USER-DEFINED SERVER MESSAGE HANDLERS
 
 int CHud :: MsgFunc_ResetHUD(const char *pszName, int iSize, void *pbuf )
@@ -80,21 +70,8 @@ void CHud :: MsgFunc_InitHUD( const char *pszName, int iSize, void *pbuf )
 		pList = pList->pNext;
 	}
 
-#if defined( _TFC )
-	ClearEventList();
-
-	// catch up on any building events that are going on
-	gEngfuncs.pfnServerCmd("sendevents");
-#endif
-
 	if ( g_pParticleMan )
 		 g_pParticleMan->ResetParticles();
-
-#if !defined( _TFC )
-	//Probably not a good place to put this.
-	pBeam = pBeam2 = NULL;
-	pFlare = NULL;	// Vit_amiN: clear egon's beam flare
-#endif
 }
 
 

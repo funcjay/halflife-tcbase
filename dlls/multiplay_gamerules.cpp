@@ -124,51 +124,6 @@ void CHalfLifeMultiplay::RefreshSkillData()
 {
 // load all default values
 	CGameRules::RefreshSkillData();
-
-// override some values for multiplay.
-
-	// suitcharger
-	gSkillData.suitchargerCapacity = 30;
-
-	// Crowbar whack
-	gSkillData.plrDmgCrowbar = 25;
-
-	// Glock Round
-	gSkillData.plrDmg9MM = 12;
-
-	// 357 Round
-	gSkillData.plrDmg357 = 40;
-
-	// MP5 Round
-	gSkillData.plrDmgMP5 = 12;
-
-	// M203 grenade
-	gSkillData.plrDmgM203Grenade = 100;
-
-	// Shotgun buckshot
-	gSkillData.plrDmgBuckshot = 20;// fewer pellets in deathmatch
-
-	// Crossbow
-	gSkillData.plrDmgCrossbowClient = 20;
-
-	// RPG
-	gSkillData.plrDmgRPG = 120;
-
-	// Egon
-	gSkillData.plrDmgEgonWide = 20;
-	gSkillData.plrDmgEgonNarrow = 10;
-
-	// Hand Grendade
-	gSkillData.plrDmgHandGrenade = 100;
-
-	// Satchel Charge
-	gSkillData.plrDmgSatchel = 120;
-
-	// Tripmine
-	gSkillData.plrDmgTripmine = 150;
-
-	// hornet
-	gSkillData.plrDmgHornet = 10;
 }
 
 // longest the intermission can last, in seconds
@@ -509,7 +464,7 @@ void CHalfLifeMultiplay :: ClientDisconnected( edict_t *pClient )
 					GETPLAYERUSERID( pPlayer->edict() ) );
 			}
 
-			pPlayer->RemoveAllItems( TRUE );// destroy all of the players weapons and items
+			pPlayer->RemoveAllItems();// destroy all of the players weapons and items
 		}
 	}
 }
@@ -561,28 +516,15 @@ void CHalfLifeMultiplay :: PlayerThink( CBasePlayer *pPlayer )
 //=========================================================
 void CHalfLifeMultiplay :: PlayerSpawn( CBasePlayer *pPlayer )
 {
-	BOOL		addDefault;
 	CBaseEntity	*pWeaponEntity = NULL;
 
 	//Ensure the player switches to the Glock on spawn regardless of setting
 	const int originalAutoWepSwitch = pPlayer->m_iAutoWepSwitch;
 	pPlayer->m_iAutoWepSwitch = 1;
 
-	pPlayer->pev->weapons |= (1<<WEAPON_SUIT);
-	
-	addDefault = TRUE;
-
 	while ( pWeaponEntity = UTIL_FindEntityByClassname( pWeaponEntity, "game_player_equip" ))
 	{
 		pWeaponEntity->Touch( pPlayer );
-		addDefault = FALSE;
-	}
-
-	if ( addDefault )
-	{
-		pPlayer->GiveNamedItem( "weapon_crowbar" );
-		pPlayer->GiveNamedItem( "weapon_9mmhandgun" );
-		pPlayer->GiveAmmo( 68, "9mm", _9MM_MAX_CARRY );// 4 full reloads
 	}
 
 	pPlayer->m_iAutoWepSwitch = originalAutoWepSwitch;
@@ -676,12 +618,6 @@ void CHalfLifeMultiplay :: PlayerKilled( CBasePlayer *pVictim, entvars_t *pKille
 		// let the killer paint another decal as soon as he'd like.
 		PK->m_flNextDecalTime = gpGlobals->time;
 	}
-#ifndef HLDEMO_BUILD
-	if ( pVictim->HasNamedPlayerItem("weapon_satchel") )
-	{
-		DeactivateSatchels( pVictim );
-	}
-#endif
 }
 
 //=========================================================

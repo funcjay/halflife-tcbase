@@ -168,23 +168,6 @@ private:
 
 #define FADE_TIME 100
 
-
-//
-//-----------------------------------------------------
-//
-class CHudGeiger: public CHudBase
-{
-public:
-	int Init() override;
-	int VidInit() override;
-	int Draw(float flTime) override;
-	int MsgFunc_Geiger(const char *pszName, int iSize, void *pbuf);
-	
-private:
-	int m_iGeigerRange;
-
-};
-
 //
 //-----------------------------------------------------
 //
@@ -601,7 +584,6 @@ public:
 	CHudAmmo		m_Ammo;
 	CHudHealth		m_Health;
 	CHudSpectator		m_Spectator;
-	CHudGeiger		m_Geiger;
 	CHudBattery		m_Battery;
 	CHudTrain		m_Train;
 	CHudFlashlight	m_Flash;

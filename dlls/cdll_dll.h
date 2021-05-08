@@ -41,7 +41,6 @@
 #define HUD_PRINTCENTER		4
 
 
-#define WEAPON_SUIT			31
 
 // used by suit voice to indicate damage sustained and repaired type to player
 

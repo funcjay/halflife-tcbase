@@ -239,8 +239,7 @@ public:
 	void EXPORT SUB_FadeOut ();
 	void EXPORT SUB_CallUseToggle() { this->Use( this, this, USE_TOGGLE, 0 ); }
 	int			ShouldToggle( USE_TYPE useType, BOOL currentState );
-	void		FireBullets( ULONG	cShots, Vector  vecSrc, Vector	vecDirShooting,	Vector	vecSpread, float flDistance, int iBulletType, int iTracerFreq = 4, int iDamage = 0, entvars_t *pevAttacker = NULL  );
-	Vector		FireBulletsPlayer( ULONG	cShots, Vector  vecSrc, Vector	vecDirShooting,	Vector	vecSpread, float flDistance, int iBulletType, int iTracerFreq = 4, int iDamage = 0, entvars_t *pevAttacker = NULL, int shared_rand = 0 );
+	void		FireBullets( ULONG	cShots, Vector  vecSrc, Vector	vecDirShooting,	Vector	vecSpread, float flDistance, int iBulletType, int iTracerFreq = 1, int iDamage = 0, entvars_t *pevAttacker = NULL  );
 
 	virtual CBaseEntity *Respawn() { return NULL; }
 
@@ -706,7 +705,7 @@ env_sound_data
 push_trigger_data
 */
 
-#define TRACER_FREQ		4			// Tracers fire every 4 bullets
+#define TRACER_FREQ		1			// Tracers fire every bullet
 
 typedef struct _SelAmmo
 {

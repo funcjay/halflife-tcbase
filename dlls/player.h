@@ -42,21 +42,6 @@
 //-----------------------------------------------------
 //This is Half-Life player entity
 //-----------------------------------------------------
-#define CSUITPLAYLIST	4		// max of 4 suit sentences queued up at any time
-
-#define SUIT_GROUP			TRUE
-#define	SUIT_SENTENCE		FALSE
-
-#define	SUIT_REPEAT_OK		0
-#define SUIT_NEXT_IN_30SEC	30
-#define SUIT_NEXT_IN_1MIN	60
-#define SUIT_NEXT_IN_5MIN	300
-#define SUIT_NEXT_IN_10MIN	600
-#define SUIT_NEXT_IN_30MIN	1800
-#define SUIT_NEXT_IN_1HOUR	3600
-
-#define CSUITNOREPEAT		32
-
 #define	SOUND_FLASHLIGHT_ON		"items/flashlight1.wav"
 #define	SOUND_FLASHLIGHT_OFF	"items/flashlight1.wav"
 
@@ -138,17 +123,9 @@ public:
 	float				m_flDuckTime;		// how long we've been ducking
 	float				m_flWallJumpTime;	// how long until next walljump
 
-	float				m_flSuitUpdate;					// when to play next suit update
-	int					m_rgSuitPlayList[CSUITPLAYLIST];// next sentencenum to play for suit update
-	int					m_iSuitPlayNext;				// next sentence slot for queue storage;
-	int					m_rgiSuitNoRepeat[CSUITNOREPEAT];		// suit sentence no repeat list
-	float				m_rgflSuitNoRepeatTime[CSUITNOREPEAT];	// how long to wait before allowing repeat
 	int					m_lastDamageAmount;		// Last damage taken
 	float				m_tbdPrev;				// Time-based damage timer
 
-	float				m_flgeigerRange;		// range to nearest radiation source
-	float				m_flgeigerDelay;		// delay per update of range msg to client
-	int					m_igeigerRangePrev;
 	int					m_iStepLeft;			// alternate left/right foot stepping sound
 	char				m_szTextureName[CBTEXTURENAMEMAX];	// current texture name we're standing on
 	char				m_chTextureType;		// current texture type
@@ -168,8 +145,7 @@ public:
 	bool m_bResetViewEntity;					//True if the player's view needs to be set back to the view entity
 	float				m_fDeadTime;			// the time at which the player died  (used in PlayerDeathThink())
 
-	BOOL			m_fNoPlayerSound;	// a debugging feature. Player makes no sound if this is true. 
-	BOOL			m_fLongJump; // does this player have the longjump module?
+	BOOL			m_fNoPlayerSound;	// a debugging feature. Player makes no sound if this is true.
 
 	float       m_tSneaking;
 	int			m_iUpdateTime;		// stores the number of frame ticks before sending HUD update messages
@@ -229,7 +205,7 @@ public:
 	int		Restore( CRestore &restore ) override;
 	void RenewItems();
 	void PackDeadPlayerItems();
-	void RemoveAllItems( BOOL removeSuit );
+	void RemoveAllItems();
 	BOOL SwitchWeapon( CBasePlayerItem *pWeapon );
 
 	// JOHN:  sends custom messages if player HUD data has changed  (eg health, ammo)
@@ -284,9 +260,6 @@ public:
 	void EXPORT PlayerDeathThink();
 	void PlayerUse();
 
-	void CheckSuitUpdate();
-	void SetSuitUpdate(const char *name, int fgroup, int iNoRepeat);
-	void UpdateGeigerCounter();
 	void CheckTimeBasedDamage();
 
 	BOOL FBecomeProne () override;

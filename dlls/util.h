@@ -483,10 +483,6 @@ inline void STOP_SOUND(edict_t *entity, int channel, const char *sample)
 	EMIT_SOUND_DYN(entity, channel, sample, 0, 0, SND_STOP, PITCH_NORM);
 }
 
-void EMIT_SOUND_SUIT(edict_t *entity, const char *sample);
-void EMIT_GROUPID_SUIT(edict_t *entity, int isentenceg);
-void EMIT_GROUPNAME_SUIT(edict_t *entity, const char *groupname);
-
 #define PRECACHE_SOUND_ARRAY( a ) \
 	{ for (int i = 0; i < ARRAYSIZE( a ); i++ ) PRECACHE_SOUND((char *) a [i]); }
 
@@ -519,7 +515,5 @@ void UTIL_UnsetGroupTrace();
 
 int UTIL_SharedRandomLong( unsigned int seed, int low, int high );
 float UTIL_SharedRandomFloat( unsigned int seed, float low, float high );
-
-float UTIL_WeaponTimeBase();
 
 CBaseEntity* UTIL_FindEntityForward(CBaseEntity* pMe);

@@ -525,7 +525,6 @@ public:
 	void KeyValue( KeyValueData *pkvd ) override;
 	void EXPORT MultiTouch( CBaseEntity *pOther );
 	void EXPORT HurtTouch ( CBaseEntity *pOther );
-	void EXPORT CDAudioTouch ( CBaseEntity *pOther );
 	void ActivateMultiTrigger( CBaseEntity *pActivator );
 	void EXPORT MultiWaitOver();
 	void EXPORT CounterUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
@@ -585,7 +584,6 @@ class CTriggerHurt : public CBaseTrigger
 {
 public:
 	void Spawn() override;
-	void EXPORT RadiationThink();
 };
 
 LINK_ENTITY_TO_CLASS( trigger_hurt, CTriggerHurt );
@@ -652,158 +650,9 @@ void CTriggerMonsterJump :: Touch( CBaseEntity *pOther )
 	pev->nextthink = gpGlobals->time;
 }
 
-
-//=====================================
-//
-// trigger_cdaudio - starts/stops cd audio tracks
-//
-class CTriggerCDAudio : public CBaseTrigger
-{
-public:
-	void Spawn() override;
-
-	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value ) override;
-	void PlayTrack();
-	void Touch ( CBaseEntity *pOther ) override;
-};
-
-LINK_ENTITY_TO_CLASS( trigger_cdaudio, CTriggerCDAudio );
-
-//
-// Changes tracks or stops CD when player touches
-//
-// !!!HACK - overloaded HEALTH to avoid adding new field
-void CTriggerCDAudio :: Touch ( CBaseEntity *pOther )
-{
-	if ( !pOther->IsPlayer() )
-	{// only clients may trigger these events
-		return;
-	}
-
-	PlayTrack();
-}
-
-void CTriggerCDAudio :: Spawn()
-{
-	InitTrigger();
-}
-
-void CTriggerCDAudio::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
-{
-	PlayTrack();
-}
-
-void PlayCDTrack( int iTrack )
-{
-	edict_t *pClient;
-	
-	// manually find the single player. 
-	pClient = g_engfuncs.pfnPEntityOfEntIndex( 1 );
-	
-	// Can't play if the client is not connected!
-	if ( !pClient )
-		return;
-
-	if ( iTrack < -1 || iTrack > 30 )
-	{
-		ALERT ( at_console, "TriggerCDAudio - Track %d out of range\n" );
-		return;
-	}
-
-	if ( iTrack == -1 )
-	{
-		CLIENT_COMMAND ( pClient, "cd stop\n");
-	}
-	else
-	{
-		char string [ 64 ];
-
-		sprintf( string, "cd play %3d\n", iTrack );
-		CLIENT_COMMAND ( pClient, string);
-	}
-}
-
-
-// only plays for ONE client, so only use in single play!
-void CTriggerCDAudio :: PlayTrack()
-{
-	PlayCDTrack( (int)pev->health );
-	
-	SetTouch( NULL );
-	UTIL_Remove( this );
-}
-
-
-// This plays a CD track when fired or when the player enters it's radius
-class CTargetCDAudio : public CPointEntity
-{
-public:
-	void			Spawn() override;
-	void			KeyValue( KeyValueData *pkvd ) override;
-
-	void	Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value ) override;
-	void			Think() override;
-	void			Play();
-};
-
-LINK_ENTITY_TO_CLASS( target_cdaudio, CTargetCDAudio );
-
-void CTargetCDAudio :: KeyValue( KeyValueData *pkvd )
-{
-	if (FStrEq(pkvd->szKeyName, "radius"))
-	{
-		pev->scale = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
-	}
-	else
-		CPointEntity::KeyValue( pkvd );
-}
-
-void CTargetCDAudio :: Spawn()
-{
-	pev->solid = SOLID_NOT;
-	pev->movetype = MOVETYPE_NONE;
-
-	if ( pev->scale > 0 )
-		pev->nextthink = gpGlobals->time + 1.0;
-}
-
-void CTargetCDAudio::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
-{
-	Play();
-}
-
-// only plays for ONE client, so only use in single play!
-void CTargetCDAudio::Think()
-{
-	edict_t *pClient;
-	
-	// manually find the single player. 
-	pClient = g_engfuncs.pfnPEntityOfEntIndex( 1 );
-	
-	// Can't play if the client is not connected!
-	if ( !pClient )
-		return;
-	
-	pev->nextthink = gpGlobals->time + 0.5;
-
-	if ( (pClient->v.origin - pev->origin).Length() <= pev->scale )
-		Play();
-
-}
-
-void CTargetCDAudio::Play() 
-{ 
-	PlayCDTrack( (int)pev->health );
-	UTIL_Remove(this); 
-}
-
-//=====================================
-
 //
 // trigger_hurt - hurts anything that touches it. if the trigger has a targetname, firing it will toggle state
 //
-//int gfToggleState = 0; // used to determine when all radiation trigger hurts have called 'RadiationThink'
 
 void CTriggerHurt :: Spawn()
 {
@@ -819,76 +668,10 @@ void CTriggerHurt :: Spawn()
 		SetUse ( NULL );
 	}
 
-	if (m_bitsDamageInflict & DMG_RADIATION)
-	{
-		SetThink ( &CTriggerHurt::RadiationThink );
-		pev->nextthink = gpGlobals->time + RANDOM_FLOAT(0.0, 0.5); 
-	}
-
 	if ( FBitSet (pev->spawnflags, SF_TRIGGER_HURT_START_OFF) )// if flagged to Start Turned Off, make trigger nonsolid.
 		pev->solid = SOLID_NOT;
 
 	UTIL_SetOrigin( pev, pev->origin );		// Link into the list
-}
-
-// trigger hurt that causes radiation will do a radius
-// check and set the player's geiger counter level
-// according to distance from center of trigger
-
-void CTriggerHurt :: RadiationThink()
-{
-
-	edict_t *pentPlayer;
-	CBasePlayer *pPlayer = NULL;
-	float flRange;
-	entvars_t *pevTarget;
-	Vector vecSpot1;
-	Vector vecSpot2;
-	Vector vecRange;
-	Vector origin;
-	Vector view_ofs;
-
-	// check to see if a player is in pvs
-	// if not, continue	
-
-	// set origin to center of trigger so that this check works
-	origin = pev->origin;
-	view_ofs = pev->view_ofs;
-
-	pev->origin = (pev->absmin + pev->absmax) * 0.5;
-	pev->view_ofs = pev->view_ofs * 0.0;
-
-	pentPlayer = FIND_CLIENT_IN_PVS(edict());
-
-	pev->origin = origin;
-	pev->view_ofs = view_ofs;
-
-	// reset origin
-
-	if (!FNullEnt(pentPlayer))
-	{
- 
-		pPlayer = GetClassPtr( (CBasePlayer *)VARS(pentPlayer));
-
-		pevTarget = VARS(pentPlayer);
-
-		// get range to player;
-
-		vecSpot1 = (pev->absmin + pev->absmax) * 0.5;
-		vecSpot2 = (pevTarget->absmin + pevTarget->absmax) * 0.5;
-		
-		vecRange = vecSpot1 - vecSpot2;
-		flRange = vecRange.Length();
-
-		// if player's current geiger counter range is larger
-		// than range to this trigger hurt, reset player's
-		// geiger counter range 
-
-		if (pPlayer->m_flgeigerRange >= flRange)
-			pPlayer->m_flgeigerRange = flRange;
-	}
-
-	pev->nextthink = gpGlobals->time + 0.25;
 }
 
 //
@@ -984,22 +767,6 @@ void CBaseTrigger :: HurtTouch ( CBaseEntity *pOther )
 	// leaving the trigger
 
 	fldmg = pev->dmg * 0.5;	// 0.5 seconds worth of damage, pev->dmg is damage/second
-
-
-	// JAY: Cut this because it wasn't fully realized.  Damage is simpler now.
-#if 0
-	switch (m_bitsDamageInflict)
-	{
-	default: break;
-	case DMG_POISON:		fldmg = POISON_DAMAGE/4; break;
-	case DMG_NERVEGAS:		fldmg = NERVEGAS_DAMAGE/4; break;
-	case DMG_RADIATION:		fldmg = RADIATION_DAMAGE/4; break;
-	case DMG_PARALYZE:		fldmg = PARALYZE_DAMAGE/4; break; // UNDONE: cut this? should slow movement to 50%
-	case DMG_ACID:			fldmg = ACID_DAMAGE/4; break;
-	case DMG_SLOWBURN:		fldmg = SLOWBURN_DAMAGE/4; break;
-	case DMG_SLOWFREEZE:	fldmg = SLOWFREEZE_DAMAGE/4; break;
-	}
-#endif
 
 	if ( fldmg < 0 )
 		pOther->TakeHealth( -fldmg, m_bitsDamageInflict );
@@ -1124,17 +891,6 @@ void CBaseTrigger :: MultiTouch( CBaseEntity *pOther )
 		 ((pevToucher->flags & FL_MONSTER) && (pev->spawnflags & SF_TRIGGER_ALLOWMONSTERS)) ||
 		 (pev->spawnflags & SF_TRIGGER_PUSHABLES) && FClassnameIs(pevToucher,"func_pushable") )
 	{
-
-#if 0
-		// if the trigger has an angles field, check player's facing direction
-		if (pev->movedir != g_vecZero)
-		{
-			UTIL_MakeVectors( pevToucher->angles );
-			if ( DotProduct( gpGlobals->v_forward, pev->movedir ) < 0 )
-				return;         // not facing the right way
-		}
-#endif
-		
 		ActivateMultiTrigger( pOther );
 	}
 }

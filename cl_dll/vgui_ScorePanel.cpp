@@ -754,19 +754,6 @@ void ScorePanel::FillGrid()
 				switch (col)
 				{
 				case COLUMN_NAME:
-					/*
-					if (g_pTrackerUser)
-					{
-						int playerSlot = m_iSortedRows[row];
-						int trackerID = gEngfuncs.GetTrackerIDForPlayer(playerSlot);
-						const char *trackerName = g_pTrackerUser->GetUserName(trackerID);
-						if (trackerName && *trackerName)
-						{
-							sprintf(sz, "   (%s)", trackerName);
-							pLabel->setText2(sz);
-						}
-					}
-					*/
 					sprintf(sz, "%s  ", pl_info->name);
 					break;
 				case COLUMN_VOICE:
@@ -780,11 +767,6 @@ void ScorePanel::FillGrid()
 					// Don't show classes if this client hasnt picked a team yet
 					if ( g_iTeamNumber == 0 )
 						bShowClass = false;
-#ifdef _TFC
-					// in TFC show all classes in spectator mode
-					if ( g_iUser1 )
-						bShowClass = true;
-#endif
 
 					if (bShowClass)
 					{
@@ -806,38 +788,6 @@ void ScorePanel::FillGrid()
 						strcpy(sz, "");
 					}
 					break;
-
-				case COLUMN_TRACKER:
-					/*
-					if (g_pTrackerUser)
-					{
-						int playerSlot = m_iSortedRows[row];
-						int trackerID = gEngfuncs.GetTrackerIDForPlayer(playerSlot);
-
-						if (g_pTrackerUser->IsFriend(trackerID) && trackerID != g_pTrackerUser->GetTrackerID())
-						{
-							pLabel->setImage(m_pTrackerIcon);
-							pLabel->setFgColorAsImageColor(false);
-							m_pTrackerIcon->setColor(Color(255, 255, 255, 0));
-						}
-					}
-					*/
-					break;
-
-#ifdef _TFC
-				case COLUMN_KILLS:
-					if (g_PlayerExtraInfo[ m_iSortedRows[row] ].teamnumber)
-						sprintf(sz, "%d",  g_PlayerExtraInfo[ m_iSortedRows[row] ].frags );
-					break;
-				case COLUMN_DEATHS:
-					if (g_PlayerExtraInfo[ m_iSortedRows[row] ].teamnumber)
-						sprintf(sz, "%d",  g_PlayerExtraInfo[ m_iSortedRows[row] ].deaths );
-					break;
-				case COLUMN_LATENCY:
-					if (g_PlayerExtraInfo[ m_iSortedRows[row] ].teamnumber)
-						sprintf(sz, "%d", g_PlayerInfoList[ m_iSortedRows[row] ].ping );
-					break;
-#else
 				case COLUMN_KILLS:
 					sprintf(sz, "%d",  g_PlayerExtraInfo[ m_iSortedRows[row] ].frags );
 					break;
@@ -847,7 +797,6 @@ void ScorePanel::FillGrid()
 				case COLUMN_LATENCY:
 					sprintf(sz, "%d", g_PlayerInfoList[ m_iSortedRows[row] ].ping );
 					break;
-#endif
 				default:
 					break;
 				}

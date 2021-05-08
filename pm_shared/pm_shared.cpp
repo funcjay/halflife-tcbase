@@ -107,8 +107,6 @@ typedef struct hull_s
 #define PLAYER_MIN_BOUNCE_SPEED		200
 #define PLAYER_FALL_PUNCH_THRESHHOLD (float)350 // won't punch player's screen/make scrape noise unless player falling at least this fast.
 
-#define PLAYER_LONGJUMP_SPEED 350 // how fast we longjump
-
 #define PLAYER_DUCKING_MULTIPLIER 0.333
 
 // double to float warning
@@ -2052,12 +2050,6 @@ void PM_LadderMove( physent_t *pLadder )
 
 	if ( pmove->movetype == MOVETYPE_NOCLIP )
 		return;
-	
-#if defined( _TFC )
-	// this is how TFC freezes players, so we don't want them climbing ladders
-	if ( pmove->maxspeed <= 1.0 )
-		return;
-#endif
 
 	pmove->PM_GetModelBounds( pLadder->model, modelmins, modelmaxs );
 
@@ -2459,23 +2451,9 @@ PM_Jump
 */
 void PM_Jump ()
 {
-	int i;
-	qboolean tfc = false;
-
-	qboolean cansuperjump = false;
-
 	if (pmove->dead)
 	{
 		pmove->oldbuttons |= IN_JUMP ;	// don't jump again until released
-		return;
-	}
-
-	tfc = atoi( pmove->PM_Info_ValueForKey( pmove->physinfo, "tfc" ) ) == 1 ? true : false;
-
-	// Spy that's feigning death cannot jump
-	if ( tfc && 
-		( pmove->deadflag == ( DEAD_DISCARDBODY + 1 ) ) )
-	{
 		return;
 	}
 
@@ -2545,47 +2523,10 @@ void PM_Jump ()
 
 	PM_PreventMegaBunnyJumping();
 
-	if ( tfc )
-	{
-		pmove->PM_PlaySound( CHAN_BODY, "player/plyrjmp8.wav", 0.5, ATTN_NORM, 0, PITCH_NORM );
-	}
-	else
-	{
-		PM_PlayStepSound( PM_MapTextureTypeStepType( pmove->chtexturetype ), 1.0 );
-	}
-
-	// See if user can super long jump?
-	cansuperjump = atoi( pmove->PM_Info_ValueForKey( pmove->physinfo, "slj" ) ) == 1 ? true : false;
+	PM_PlayStepSound( PM_MapTextureTypeStepType( pmove->chtexturetype ), 1.0 );
 
 	// Acclerate upward
-	// If we are ducking...
-	if ( ( pmove->bInDuck ) || ( pmove->flags & FL_DUCKING ) )
-	{
-		// Adjust for super long jump module
-		// UNDONE -- note this should be based on forward angles, not current velocity.
-		if ( cansuperjump &&
-			( pmove->cmd.buttons & IN_DUCK ) &&
-			( pmove->flDuckTime > 0 ) &&
-			Length( pmove->velocity ) > 50 )
-		{
-			pmove->punchangle[0] = -5;
-
-			for (i =0; i < 2; i++)
-			{
-				pmove->velocity[i] = pmove->forward[i] * PLAYER_LONGJUMP_SPEED * 1.6;
-			}
-		
-			pmove->velocity[2] = sqrt(2 * 800 * 56.0);
-		}
-		else
-		{
-			pmove->velocity[2] = sqrt(2 * 800 * 45.0);
-		}
-	}
-	else
-	{
-		pmove->velocity[2] = sqrt(2 * 800 * 45.0);
-	}
+	pmove->velocity[2] = sqrt(2 * 800 * 45.0);
 
 	// Decay it for simulation
 	PM_FixupGravityVelocity();
@@ -2677,29 +2618,11 @@ void PM_CheckFalling()
 		}
 		else if ( pmove->flFallVelocity > PLAYER_MAX_SAFE_FALL_SPEED )
 		{
-			// NOTE:  In the original game dll , there were no breaks after these cases, causing the first one to 
-			// cascade into the second
-			//switch ( RandomLong(0,1) )
-			//{
-			//case 0:
-				//pmove->PM_PlaySound( CHAN_VOICE, "player/pl_fallpain2.wav", 1, ATTN_NORM, 0, PITCH_NORM );
-				//break;
-			//case 1:
-				pmove->PM_PlaySound( CHAN_VOICE, "player/pl_fallpain3.wav", 1, ATTN_NORM, 0, PITCH_NORM );
-			//	break;
-			//}
+			pmove->PM_PlaySound( CHAN_VOICE, "player/pl_fallpain3.wav", 1, ATTN_NORM, 0, PITCH_NORM );
 			fvol = 1.0;
 		}
 		else if ( pmove->flFallVelocity > PLAYER_MAX_SAFE_FALL_SPEED / 2 )
 		{
-			qboolean tfc = false;
-			tfc = atoi( pmove->PM_Info_ValueForKey( pmove->physinfo, "tfc" ) ) == 1 ? true : false;
-
-			if ( tfc )
-			{
-				pmove->PM_PlaySound( CHAN_VOICE, "player/pl_fallpain3.wav", 1, ATTN_NORM, 0, PITCH_NORM );
-			}
-
 			fvol = 0.85;
 		}
 		else if ( pmove->flFallVelocity < PLAYER_MIN_BOUNCE_SPEED )
@@ -3009,13 +2932,11 @@ void PM_PlayerMove ( qboolean server )
 		}
 	}
 
-#if !defined( _TFC )
 	// Slow down, I'm pulling it! (a box maybe) but only when I'm standing on ground
 	if ( ( pmove->onground != -1 ) && ( pmove->cmd.buttons & IN_USE) )
 	{
 		VectorScale( pmove->velocity, 0.3, pmove->velocity );
 	}
-#endif
 
 	// Handle movement
 	switch ( pmove->movetype )

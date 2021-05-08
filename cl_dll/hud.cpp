@@ -30,6 +30,8 @@
 #include "demo_api.h"
 #include "vgui_ScorePanel.h"
 
+#include "CFMODEngine.h"
+
 hud_player_info_t	 g_PlayerInfoList[MAX_PLAYERS+1];	   // player info from the engine
 extra_player_info_t  g_PlayerExtraInfo[MAX_PLAYERS+1];   // additional player info sent directly to the client dll
 
@@ -82,9 +84,6 @@ extern client_sprite_t *GetSpriteList(client_sprite_t *pList, const char *psz, i
 
 extern cvar_t *sensitivity;
 cvar_t *cl_lw = NULL;
-cvar_t* cl_rollangle = nullptr;
-cvar_t* cl_rollspeed = nullptr;
-cvar_t* cl_bobtilt = nullptr;
 
 void ShutdownInput ();
 
@@ -321,15 +320,14 @@ void CHud :: Init()
 
 	CVAR_CREATE( "zoom_sensitivity_ratio", "1.2", 0 );
 	CVAR_CREATE("cl_autowepswitch", "1", FCVAR_ARCHIVE | FCVAR_USERINFO);
-	default_fov = CVAR_CREATE( "default_fov", "90", FCVAR_ARCHIVE);
+	default_fov = CVAR_CREATE( "default_fov", "105", FCVAR_ARCHIVE);
 	m_pCvarStealMouse = CVAR_CREATE( "hud_capturemouse", "1", FCVAR_ARCHIVE );
 	m_pCvarDraw = CVAR_CREATE( "hud_draw", "1", FCVAR_ARCHIVE );
 	cl_lw = gEngfuncs.pfnGetCvarPointer( "cl_lw" );
-	cl_rollangle = CVAR_CREATE("cl_rollangle", "2.0", FCVAR_ARCHIVE);
-	cl_rollspeed = CVAR_CREATE("cl_rollspeed", "200", FCVAR_ARCHIVE);
-	cl_bobtilt = CVAR_CREATE("cl_bobtilt", "0", FCVAR_ARCHIVE);
 
 	m_pSpriteList = NULL;
+
+	gFMOD.InitializeHUD();
 
 	// Clear any old HUD list
 	if ( m_pHudList )
@@ -351,7 +349,6 @@ void CHud :: Init()
 	m_Health.Init();
 	m_SayText.Init();
 	m_Spectator.Init();
-	m_Geiger.Init();
 	m_Train.Init();
 	m_Battery.Init();
 	m_Flash.Init();
@@ -494,7 +491,6 @@ void CHud :: VidInit()
 	m_Ammo.VidInit();
 	m_Health.VidInit();
 	m_Spectator.VidInit();
-	m_Geiger.VidInit();
 	m_Train.VidInit();
 	m_Battery.VidInit();
 	m_Flash.VidInit();

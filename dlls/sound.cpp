@@ -1424,51 +1424,6 @@ void EMIT_SOUND_DYN(edict_t *entity, int channel, const char *sample, float volu
 		EMIT_SOUND_DYN2(entity, channel, sample, volume, attenuation, flags, pitch);
 }
 
-// play a specific sentence over the HEV suit speaker - just pass player entity, and !sentencename
-
-void EMIT_SOUND_SUIT(edict_t *entity, const char *sample)
-{
-	float fvol;
-	int pitch = PITCH_NORM;
-
-	fvol = CVAR_GET_FLOAT("suitvolume");
-	if (RANDOM_LONG(0,1))
-		pitch = RANDOM_LONG(0,6) + 98;
-
-	if (fvol > 0.05)
-		EMIT_SOUND_DYN(entity, CHAN_STATIC, sample, fvol, ATTN_NORM, 0, pitch);
-}
-
-// play a sentence, randomly selected from the passed in group id, over the HEV suit speaker
-
-void EMIT_GROUPID_SUIT(edict_t *entity, int isentenceg)
-{
-	float fvol;
-	int pitch = PITCH_NORM;
-
-	fvol = CVAR_GET_FLOAT("suitvolume");
-	if (RANDOM_LONG(0,1))
-		pitch = RANDOM_LONG(0,6) + 98;
-
-	if (fvol > 0.05)
-		SENTENCEG_PlayRndI(entity, isentenceg, fvol, ATTN_NORM, 0, pitch);
-}
-
-// play a sentence, randomly selected from the passed in groupname
-
-void EMIT_GROUPNAME_SUIT(edict_t *entity, const char *groupname)
-{
-	float fvol;
-	int pitch = PITCH_NORM;
-
-	fvol = CVAR_GET_FLOAT("suitvolume");
-	if (RANDOM_LONG(0,1))
-		pitch = RANDOM_LONG(0,6) + 98;
-
-	if (fvol > 0.05)
-		SENTENCEG_PlayRndSz(entity, groupname, fvol, ATTN_NORM, 0, pitch);
-}
-
 // ===================== MATERIAL TYPE DETECTION, MAIN ROUTINES ========================
 // 
 // Used to detect the texture the player is standing on, map the

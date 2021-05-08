@@ -60,9 +60,6 @@ extern cvar_t	*cl_forwardspeed;
 extern cvar_t	*chase_active;
 extern cvar_t	*scr_ofsx, *scr_ofsy, *scr_ofsz;
 extern cvar_t	*cl_vsmoothing;
-extern cvar_t* cl_rollangle;
-extern cvar_t* cl_rollspeed;
-extern cvar_t* cl_bobtilt;
 
 #define	CAM_MODE_RELAX		1
 #define CAM_MODE_FOCUS		2
@@ -409,7 +406,7 @@ void V_CalcViewRoll ( struct ref_params_s *pparams )
 	if ( !viewentity )
 		return;
 
-	side = V_CalcRoll ( viewentity->angles, pparams->simvel, cl_rollangle->value, cl_rollspeed->value);
+	side = V_CalcRoll ( viewentity->angles, pparams->simvel, pparams->movevars->rollangle, pparams->movevars->rollspeed);
 
 	pparams->viewangles[ROLL] += side;
 
@@ -661,11 +658,6 @@ void V_CalcNormalRefdef ( struct ref_params_s *pparams )
 	view->angles[ROLL]  -= bob * 1;
 	view->angles[PITCH] -= bob * 0.3;
 
-	if (cl_bobtilt->value)
-	{
-		VectorCopy(view->angles, view->curstate.angles);
-	}
-
 	// pushing the view origin down off of the same X/Z plane as the ent's origin will give the
 	// gun a very nice 'shifting' effect when the player looks up/down. If there is a problem
 	// with view model distortion, this may be a cause. (SJB). 
@@ -699,7 +691,6 @@ void V_CalcNormalRefdef ( struct ref_params_s *pparams )
 	V_DropPunchAngle ( pparams->frametime, (float *)&ev_punchangle );
 
 	// smooth out stair step ups
-#if 1
 	if ( !pparams->smoothing && pparams->onground && pparams->simorg[2] - oldz > 0)
 	{
 		float steptime;
@@ -721,7 +712,6 @@ void V_CalcNormalRefdef ( struct ref_params_s *pparams )
 	{
 		oldz = pparams->simorg[2];
 	}
-#endif
 
 	{
 		static float lastorg[3];
@@ -1399,26 +1389,6 @@ int V_FindViewModelByWeaponModel(int weaponindex)
 {
 
 	static const char * modelmap[][2] =	{
-
-# ifdef _TFC	// TFC models override HL models
-		{ "models/p_mini.mdl",			"models/v_tfac.mdl"			},
-		{ "models/p_sniper.mdl",		"models/v_tfc_sniper.mdl"	},
-		{ "models/p_umbrella.mdl",		"models/v_umbrella.mdl"		},
-		{ "models/p_crowbar.mdl",		"models/v_tfc_crowbar.mdl"	},
-		{ "models/p_spanner.mdl",		"models/v_tfc_spanner.mdl"	},
-		{ "models/p_knife.mdl",			"models/v_tfc_knife.mdl"	},
-		{ "models/p_medkit.mdl",		"models/v_tfc_medkit.mdl"	},
-		{ "models/p_egon.mdl",			"models/v_flame.mdl"		},
-		{ "models/p_glauncher.mdl",		"models/v_tfgl.mdl"			},
-		{ "models/p_rpg.mdl",			"models/v_tfc_rpg.mdl"		},
-		{ "models/p_nailgun.mdl",		"models/v_tfc_nailgun.mdl"	},
-		{ "models/p_snailgun.mdl",		"models/v_tfc_supernailgun.mdl" },
-		{ "models/p_9mmhandgun.mdl",	"models/v_tfc_railgun.mdl"	},
-		{ "models/p_srpg.mdl",			"models/v_tfc_rpg.mdl"		},
-		{ "models/p_smallshotgun.mdl",	"models/v_tfc_12gauge.mdl"	},
-		{ "models/p_shotgun.mdl",		"models/v_tfc_shotgun.mdl"	},
-		{ "models/p_spygun.mdl",		"models/v_tfc_pistol.mdl"	},
-#endif
 		{ "models/p_crossbow.mdl",		"models/v_crossbow.mdl"		},
 		{ "models/p_crowbar.mdl",		"models/v_crowbar.mdl"		},
 		{ "models/p_egon.mdl",			"models/v_egon.mdl"			},
@@ -1504,11 +1474,7 @@ void V_CalcSpectatorRefdef ( struct ref_params_s * pparams )
 		}
 
 		// predict missing client data and set weapon model ( in HLTV mode or inset in eye mode )
-#ifdef _TFC
-		if ( gEngfuncs.IsSpectateOnly() || gHUD.m_Spectator.m_pip->value == INSET_IN_EYE )
-#else
 		if ( gEngfuncs.IsSpectateOnly() )
-#endif
 		{
 			V_GetInEyePos( g_iUser2, pparams->simorg, pparams->cl_viewangles );
 
@@ -1642,8 +1608,6 @@ void V_CalcSpectatorRefdef ( struct ref_params_s * pparams )
 
 void DLLEXPORT V_CalcRefdef( struct ref_params_s *pparams )
 {
-//	RecClCalcRefdef(pparams);
-
 	// intermission / finale rendering
 	if ( pparams->intermission )
 	{	
@@ -1657,25 +1621,6 @@ void DLLEXPORT V_CalcRefdef( struct ref_params_s *pparams )
 	{
 		V_CalcNormalRefdef ( pparams );
 	}
-
-/*
-// Example of how to overlay the whole screen with red at 50 % alpha
-#define SF_TEST
-#if defined SF_TEST
-	{
-		screenfade_t sf;
-		gEngfuncs.pfnGetScreenFade( &sf );
-
-		sf.fader = 255;
-		sf.fadeg = 0;
-		sf.fadeb = 0;
-		sf.fadealpha = 128;
-		sf.fadeFlags = FFADE_STAYOUT | FFADE_OUT;
-
-		gEngfuncs.pfnSetScreenFade( &sf );
-	}
-#endif
-*/
 }
 
 /*
@@ -1728,86 +1673,3 @@ void V_Init ()
 	cl_waterdist		= gEngfuncs.pfnRegisterVariable( "cl_waterdist","4", 0 );
 	cl_chasedist		= gEngfuncs.pfnRegisterVariable( "cl_chasedist","112", 0 );
 }
-
-
-//#define TRACE_TEST
-#if defined( TRACE_TEST )
-
-extern float in_fov;
-/*
-====================
-CalcFov
-====================
-*/
-float CalcFov (float fov_x, float width, float height)
-{
-	float	a;
-	float	x;
-
-	if (fov_x < 1 || fov_x > 179)
-		fov_x = 90;	// error, set to 90
-
-	x = width/tan(fov_x/360*M_PI);
-
-	a = atan (height/x);
-
-	a = a*360/M_PI;
-
-	return a;
-}
-
-int hitent = -1;
-
-void V_Move( int mx, int my )
-{
-	float fov;
-	float fx, fy;
-	float dx, dy;
-	float c_x, c_y;
-	float dX, dY;
-	Vector forward, up, right;
-	Vector newangles;
-
-	Vector farpoint;
-	pmtrace_t tr;
-
-	fov = CalcFov( in_fov, (float)ScreenWidth, (float)ScreenHeight );
-
-	c_x = (float)ScreenWidth / 2.0;
-	c_y = (float)ScreenHeight / 2.0;
-
-	dx = (float)mx - c_x;
-	dy = (float)my - c_y;
-
-	// Proportion we moved in each direction
-	fx = dx / c_x;
-	fy = dy / c_y;
-
-	dX = fx * in_fov / 2.0 ;
-	dY = fy * fov / 2.0;
-
-	newangles = v_angles;
-
-	newangles[ YAW ] -= dX;
-	newangles[ PITCH ] += dY;
-
-	// Now rotate v_forward around that point
-	AngleVectors ( newangles, forward, right, up );
-
-	farpoint = v_origin + 8192 * forward;
-
-	// Trace
-	tr = *(gEngfuncs.PM_TraceLine( (float *)&v_origin, (float *)&farpoint, PM_TRACELINE_PHYSENTSONLY, 2 /*point sized hull*/, -1 ));
-
-	if ( tr.fraction != 1.0 && tr.ent != 0 )
-	{
-		hitent = PM_GetPhysEntInfo( tr.ent );
-		PM_ParticleLine( (float *)&v_origin, (float *)&tr.endpos, 5, 1.0, 0.0 );
-	}
-	else
-	{
-		hitent = -1;
-	}
-}
-
-#endif
