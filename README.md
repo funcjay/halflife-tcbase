@@ -3,13 +3,33 @@ Half-Life 1 Total Conversion base
 
 This repository is meant to serve as a base for other mod creators who want to create a total conversion, but don't want to waste time on cutting out all the un-needed vanilla game code.
 
-This is based off of [Solokiller's Half-Life Updated repository](https://github.com/Solokiller/halflife-updated), which fixes a lot of vanilla bugs and updates the project files to work with Visual Studio 2019/2017.
+This is based off of [Solokiller's Half-Life Updated repository](https://github.com/Solokiller/halflife-updated), which fixes a lot of vanilla bugs and updates the project files to work with Visual Studio 2019.
 
 Changes from the original codebase:
-- temp, list here once done
+- added env_model (by Magic Nipples; ported from SoHL)
+- added env_music (by Shepard; FMOD implementation)
+- added player_freeze (by Shepard; ported from SoHL)
+- weapons are fully server-sided
+- fixed being unable to use things while reloading or switching weapons
+- changed default weapon tracer frequency from 4 to 1 (always trace)
+- added new TANK bullet types for func_tank
+- monsters lose collision as soon as they die instead of after their death anim ends
+- removed unused bullet types
+- removed viewroll and WON bob
+- removed useless entities (cdaudio stuff, cyclers, cine monsters...)
+- removed Half-Life monsters and weapons (left zombie and crowbar as placeholders)
+- removed HEV suit
+- removed a bunch of unused code (TFC and #if 0 stuff)
+- commented out "error" messages about being unable to find certain files that will almost always be missing
 
 Credits & special thanks:
-- temp, list here once done
+- Magic Nipples: Porting env_model to vanilla HL1
+- Shepard: Writing the FMOD implementation, porting player_freeze to vanilla HL1 and generally being a cool guy
+- James: Being extremely supportive and helping out with more things than I can be bothered to remember
+
+Main mod files will be hosted on the releases page (yes, you need some of them even if you're gonna re-compile the code anyway).
+Please note that any mod using FMOD needs to have an FMOD logo somewhere in-game (like the main menu)!
+The logo files will be included in every build of this base.
 
 
 Half Life 1 SDK LICENSE
