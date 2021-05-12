@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2002, Valve LLC, All rights reserved. ============
+//========= Copyright ï¿½ 1996-2002, Valve LLC, All rights reserved. ============
 //
 // Purpose: 
 //
@@ -23,8 +23,8 @@ public:
 	void InitHUDData( void );
 
 private:
-	HSPRITE m_hsprPlayer;
-	HSPRITE m_hsprViewcone;
+	HSPRITE_HL m_hsprPlayer;
+	HSPRITE_HL m_hsprViewcone;
 };
 
 
