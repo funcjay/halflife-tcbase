@@ -33,6 +33,7 @@
 #include "weapons.h"
 #include "gamerules.h"
 #include "teamplay_gamerules.h"
+#include "CClientFog.h"
 
 extern CGraph WorldGraph;
 extern CSoundEnt *pSoundEnt;
@@ -41,6 +42,7 @@ extern CBaseEntity				*g_pLastSpawn;
 DLL_GLOBAL edict_t				*g_pBodyQueueHead;
 CGlobalState					gGlobalState;
 extern DLL_GLOBAL	int			gDisplayTitle;
+extern DLL_GLOBAL int			gLevelLoaded;
 
 extern void W_Precache();
 
@@ -476,6 +478,8 @@ void CWorld :: Spawn()
 
 void CWorld :: Precache()
 {
+	gLevelLoaded = TRUE;
+
 	g_pLastSpawn = NULL;
 	
 	CVAR_SET_STRING("sv_gravity", "800"); // 67ft/sec

@@ -240,6 +240,9 @@
     <ClCompile Include="..\..\dlls\triggers\CPlayerFreeze.cpp">
       <Filter>Source Files\dlls\triggers</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\dlls\misc\CClientFog.cpp">
+      <Filter>Source Files\dlls\misc</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\dlls\doors.h">
@@ -496,6 +499,9 @@
     </ClInclude>
     <ClInclude Include="..\..\common\winsani_out.h">
       <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\dlls\CClientFog.h">
+      <Filter>Header Files\dlls</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

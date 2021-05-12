@@ -126,6 +126,8 @@ public:
 	int					m_lastDamageAmount;		// Last damage taken
 	float				m_tbdPrev;				// Time-based damage timer
 
+	BOOL				m_fUpdateFog;			// True when fog update msg needs to be sent
+
 	int					m_iStepLeft;			// alternate left/right foot stepping sound
 	char				m_szTextureName[CBTEXTURENAMEMAX];	// current texture name we're standing on
 	char				m_chTextureType;		// current texture type

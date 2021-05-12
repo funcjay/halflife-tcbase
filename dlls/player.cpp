@@ -41,6 +41,8 @@
 #include "UserMessages.h"
 #include "client.h"
 
+#include "CClientFog.h"
+
 // #define DUCKFIX
 
 extern DLL_GLOBAL ULONG		g_ulModelIndexPlayer;
@@ -48,7 +50,7 @@ extern DLL_GLOBAL BOOL		g_fGameOver;
 extern DLL_GLOBAL	BOOL	g_fDrawLines;
 int gEvilImpulse101;
 extern DLL_GLOBAL int		g_iSkillLevel, gDisplayTitle;
-
+extern DLL_GLOBAL int		gLevelLoaded;
 
 BOOL gInitHUD = TRUE;
 
@@ -1062,6 +1064,7 @@ void CBasePlayer::PlayerDeathThink()
 
 	pev->button = 0;
 	m_iRespawnFrames = 0;
+	m_fUpdateFog = TRUE;
 
 	//ALERT(at_console, "Respawn\n");
 
@@ -2404,6 +2407,9 @@ int CBasePlayer::Restore( CRestore &restore )
 
 	m_bRestored = true;
 
+	//Force the fog to update next frame
+	m_fUpdateFog = TRUE;
+
 	return status;
 }
 
@@ -3449,6 +3455,20 @@ void CBasePlayer :: UpdateClientData()
 
 	//Handled anything that needs resetting
 	m_bRestored = false;
+
+	//Update fog after respawn (also sets the fog after connect in multiplayer)
+	if (m_fUpdateFog)
+	{
+		m_fUpdateFog = FALSE;
+		CClientFog::CheckFogForClient(edict());
+	}
+
+	//Enable fog after level load (singleplayer only)
+	if (gLevelLoaded)
+	{
+		CClientFog::CheckFogForClient(edict());
+		gLevelLoaded = FALSE;
+	}
 }
 
 

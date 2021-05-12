@@ -36,3 +36,4 @@ DLL_GLOBAL int			g_iSkillLevel;
 DLL_GLOBAL int			gDisplayTitle;
 DLL_GLOBAL BOOL			g_fGameOver;
 DLL_GLOBAL int			g_Language;
+DLL_GLOBAL int			gLevelLoaded;

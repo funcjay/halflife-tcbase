@@ -518,20 +518,21 @@ void CRenderFxManager :: Use ( CBaseEntity *pActivator, CBaseEntity *pCaller, US
 
 
 
+
 class CBaseTrigger : public CBaseToggle
 {
 public:
-	void EXPORT TeleportTouch ( CBaseEntity *pOther );
-	void KeyValue( KeyValueData *pkvd ) override;
-	void EXPORT MultiTouch( CBaseEntity *pOther );
-	void EXPORT HurtTouch ( CBaseEntity *pOther );
-	void ActivateMultiTrigger( CBaseEntity *pActivator );
+	void EXPORT TeleportTouch(CBaseEntity* pOther);
+	void KeyValue(KeyValueData* pkvd) override;
+	void EXPORT MultiTouch(CBaseEntity* pOther);
+	void EXPORT HurtTouch(CBaseEntity* pOther);
+	void ActivateMultiTrigger(CBaseEntity* pActivator);
 	void EXPORT MultiWaitOver();
-	void EXPORT CounterUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
-	void EXPORT ToggleUse ( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+	void EXPORT CounterUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value);
+	void EXPORT ToggleUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value);
 	void InitTrigger();
 
-	int	ObjectCaps() override { return CBaseToggle :: ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+	int	ObjectCaps() override { return CBaseToggle::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
 };
 
 LINK_ENTITY_TO_CLASS( trigger, CBaseTrigger );

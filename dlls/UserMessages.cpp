@@ -59,6 +59,8 @@ int gmsgStatusValue = 0;
 
 int gmsgFMOD = 0;
 
+int gmsgSetFog = 0;
+
 void LinkUserMessages()
 {
 	// Already taken care of?
@@ -104,4 +106,6 @@ void LinkUserMessages()
 	gmsgStatusValue = REG_USER_MSG("StatusValue", 3);
 
 	gmsgFMOD = REG_USER_MSG("FMOD", -1);
+
+	gmsgSetFog = REG_USER_MSG("SetFog", -1);
 }

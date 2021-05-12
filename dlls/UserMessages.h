@@ -55,4 +55,6 @@ extern int gmsgStatusValue;
 
 extern int gmsgFMOD;
 
+extern int gmsgSetFog;
+
 void LinkUserMessages();
